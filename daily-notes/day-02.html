@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 02 / 6W — GENAI Architect B9</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cobalt: #1B4FFF;
+  --cobalt-light: #4B73FF;
+  --coral: #FF4444;
+  --coral-light: #FF7070;
+  --ink: #0E0E12;
+  --ink2: #F4F6FF;
+  --ink3: #E8ECF8;
+  --white: #FFFFFF;
+  --muted: #6B6B82;
+  --border: rgba(27,79,255,0.10);
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
+
+.glow-top { position: fixed; top: -200px; right: -150px; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(27,79,255,0.18) 0%, transparent 65%); pointer-events: none; z-index: 0; }
+.glow-bottom { position: fixed; bottom: -150px; left: -100px; width: 450px; height: 450px; border-radius: 50%; background: radial-gradient(circle, rgba(255,68,68,0.1) 0%, transparent 65%); pointer-events: none; z-index: 0; }
+
+/* NAV */
+nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(18px); border-bottom: 1px solid #E5E8F0; padding: 15px 28px; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 15px; color: var(--ink); }
+.nav-brand span { color: var(--cobalt); }
+.nav-badge { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; color: var(--white); background: var(--cobalt); padding: 5px 14px; border-radius: 100px; }
+
+/* HERO */
+.hero { position: relative; z-index: 1; padding: 72px 28px 56px; max-width: 760px; margin: 0 auto; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--cobalt); margin-bottom: 22px; opacity: 0.9; }
+.eyebrow::before { content: ''; display: block; width: 20px; height: 2px; background: var(--cobalt); border-radius: 2px; }
+.hero-counter { font-family: 'Space Grotesk', sans-serif; font-size: clamp(96px, 23vw, 168px); font-weight: 800; line-height: 0.85; letter-spacing: -5px; color: var(--ink); margin-bottom: 6px; }
+.hero-counter sup { font-size: 0.22em; letter-spacing: -1px; color: var(--coral); vertical-align: super; margin-left: 4px; }
+.hero-slash { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: var(--muted); margin-bottom: 20px; }
+.hero-slash span { color: var(--cobalt); font-weight: 700; }
+.hero-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(22px, 5vw, 34px); font-weight: 800; line-height: 1.15; letter-spacing: -0.8px; margin-bottom: 16px; max-width: 520px; color: var(--ink); }
+.hero-title em { font-style: normal; color: var(--cobalt); }
+.hero-summary { font-size: 15px; color: var(--muted); max-width: 500px; line-height: 1.8; margin-bottom: 42px; }
+
+/* PROGRESS */
+.progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.progress-meta-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.progress-pct { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; color: var(--cobalt); }
+.progress-track { height: 6px; background: #E5E8F0; border-radius: 100px; overflow: visible; position: relative; }
+.progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--cobalt), var(--cobalt-light)); border-radius: 100px; transition: width 1.4s cubic-bezier(.16,1,.3,1); position: relative; }
+.progress-fill::after { content: ''; position: absolute; right: -2px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; background: var(--cobalt); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 3px rgba(27,79,255,0.35); }
+
+/* LAYOUT */
+.divider { border: none; border-top: 1px solid #E5E8F0; margin: 52px 0; }
+.content { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 28px; }
+.section-label { font-family: 'Space Grotesk', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 3.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.group-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 4px 0 13px 2px; opacity: 0.6; }
+
+/* TASK CARDS */
+.task-card { display: flex; align-items: flex-start; gap: 16px; padding: 20px 22px; border-radius: 14px; margin-bottom: 10px; background: var(--ink2); border: 1px solid var(--border); transition: border-color 0.22s, transform 0.18s; }
+.task-card:hover { transform: translateX(5px); }
+.task-card.pre { border-left: 3px solid var(--coral); }
+.task-card.pre:hover { border-color: var(--coral); }
+.task-card.setup { border-left: 3px solid var(--cobalt); }
+.task-card.setup:hover { border-color: var(--cobalt); }
+.task-num { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 800; width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+.task-card.pre .task-num { background: rgba(255,68,68,0.15); color: var(--coral); border: 1px solid rgba(255,68,68,0.3); }
+.task-card.setup .task-num { background: rgba(27,79,255,0.15); color: var(--cobalt-light); border: 1px solid rgba(27,79,255,0.3); }
+.task-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+.task-sub { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.task-sub a { color: var(--cobalt-light); text-decoration: underline; text-underline-offset: 3px; }
+.task-sub strong { color: var(--ink); }
+.task-tag { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; margin-left: auto; flex-shrink: 0; align-self: flex-start; margin-top: 3px; }
+.tag-coral { color: var(--coral); background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.25); }
+.tag-cobalt { color: var(--cobalt-light); background: rgba(27,79,255,0.12); border: 1px solid rgba(27,79,255,0.28); }
+
+/* STORY CARD — tutor background narrative */
+.story-card { border-radius: 18px; padding: 32px 30px; margin-bottom: 16px; background: var(--ink2); border: 1px solid var(--border); border-top: 3px solid var(--cobalt); position: relative; overflow: hidden; }
+.story-card::after { content: '"'; position: absolute; top: -24px; right: 22px; font-family: 'Space Grotesk', sans-serif; font-size: 160px; font-weight: 800; color: var(--cobalt); opacity: 0.07; line-height: 1; pointer-events: none; }
+.story-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--cobalt); margin-bottom: 14px; }
+.story-body { font-size: 14px; color: #444; line-height: 1.85; position: relative; z-index: 1; }
+.story-body strong { color: var(--ink); font-weight: 600; }
+.story-body em { font-style: normal; color: var(--cobalt); font-weight: 600; }
+.story-attr { font-size: 12px; color: var(--muted); margin-top: 16px; }
+.story-attr strong { color: var(--ink); }
+
+/* HIGHLIGHT BOX */
+.highlight-box { border-radius: 14px; padding: 22px 24px; margin-bottom: 10px; background: rgba(27,79,255,0.05); border: 1px solid rgba(27,79,255,0.18); border-left: 3px solid var(--cobalt); }
+.highlight-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--cobalt); margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+.highlight-body { font-size: 14px; color: #444; line-height: 1.75; }
+.highlight-body strong { color: var(--ink); }
+
+/* WARN */
+.warn-card { border-radius: 14px; padding: 20px 22px; margin-bottom: 10px; background: rgba(255,68,68,0.05); border: 1px solid rgba(255,68,68,0.18); border-left: 3px solid var(--coral); }
+.warn-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--coral); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.warn-body { font-size: 13px; color: #555; line-height: 1.65; }
+.warn-body strong { color: var(--ink); }
+
+/* STAT STRIP */
+.stat-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 56px; }
+.stat-card { background: var(--ink2); border: 1px solid var(--border); border-radius: 14px; padding: 22px 20px; text-align: center; }
+.stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 800; color: var(--cobalt); letter-spacing: -1px; line-height: 1; margin-bottom: 6px; }
+.stat-label { font-size: 12px; color: var(--muted); font-weight: 500; line-height: 1.4; }
+
+/* SYNC CARD */
+.sync-card { border-radius: 14px; padding: 22px 24px; margin-bottom: 56px; background: var(--ink2); border: 1px solid var(--border); border-left: 3px solid var(--cobalt); }
+.sync-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 800; color: var(--cobalt); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.sync-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; font-size: 13px; color: #444; line-height: 1.6; }
+.sync-item:last-child { margin-bottom: 0; }
+.sync-num { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 800; color: var(--cobalt-light); background: rgba(27,79,255,0.1); border: 1px solid rgba(27,79,255,0.2); width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.sync-item strong { color: var(--ink); }
+
+/* PILLS */
+.pills { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 56px; }
+.pill { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 16px; border-radius: 100px; border: 1px solid; transition: transform 0.15s; }
+.pill:hover { transform: scale(1.05); }
+.p-cobalt { color: var(--cobalt-light); background: rgba(27,79,255,0.10); border-color: rgba(27,79,255,0.28); }
+.p-coral  { color: var(--coral);       background: rgba(255,68,68,0.08);  border-color: rgba(255,68,68,0.28); }
+.p-white  { color: #555;               background: rgba(0,0,0,0.04);      border-color: rgba(0,0,0,0.12); }
+
+/* TOOLS */
+.tools-grid { display: grid; gap: 10px; margin-bottom: 56px; }
+.tool-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-radius: 12px; background: var(--ink2); border: 1px solid var(--border); text-decoration: none; color: var(--ink); transition: border-color 0.2s; }
+.tool-item:hover { border-color: var(--cobalt); }
+.tool-icon { width: 38px; height: 38px; border-radius: 9px; font-size: 18px; background: white; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tool-name { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; color: var(--ink); }
+.tool-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* MANTRA */
+.mantra { border-radius: 20px; padding: 52px 32px; text-align: center; margin-bottom: 56px; background: var(--cobalt); position: relative; overflow: hidden; }
+.mantra::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%); pointer-events: none; }
+.mantra::after { content: '⬡'; position: absolute; font-size: 260px; opacity: 0.06; top: -70px; right: -50px; color: var(--white); pointer-events: none; }
+.mantra-label { font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 12px; }
+.mantra-text { font-family: 'Space Grotesk', sans-serif; font-size: clamp(22px, 5vw, 34px); font-weight: 800; color: var(--white); letter-spacing: -0.8px; line-height: 1.2; }
+
+/* COMMUNITY */
+.community-card { border-radius: 14px; padding: 26px 26px; margin-bottom: 56px; background: var(--ink2); border: 1px solid var(--border); border-left: 3px solid var(--cobalt); }
+.community-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 800; color: var(--cobalt); margin-bottom: 13px; display: flex; align-items: center; gap: 8px; }
+.community-body { font-size: 14px; color: #444; line-height: 1.85; }
+.community-body strong { color: var(--ink); font-weight: 600; }
+.community-body a { color: var(--cobalt-light); text-decoration: underline; text-underline-offset: 3px; }
+
+/* FINAL NOTE */
+.final-note { text-align: center; padding: 28px 20px 0; margin-bottom: 52px; }
+.final-note .headline { font-family: 'Space Grotesk', sans-serif; font-size: clamp(18px, 3.5vw, 24px); font-weight: 800; color: var(--ink); }
+.final-note .headline em { font-style: normal; color: var(--cobalt-light); }
+.final-note .sub { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+/* FOOTER */
+footer { border-top: 1px solid #E5E8F0; padding: 26px 28px; max-width: 760px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: relative; z-index: 1; }
+.footer-brand { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--ink); }
+.footer-brand span { color: var(--cobalt); }
+.footer-meta { font-size: 12px; color: var(--muted); }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.hero { animation: fadeUp 0.65s ease both; }
+.content > * { animation: fadeUp 0.65s ease both; }
+.content > *:nth-child(1) { animation-delay: 0.05s; }
+.content > *:nth-child(2) { animation-delay: 0.10s; }
+.content > *:nth-child(3) { animation-delay: 0.15s; }
+.content > *:nth-child(4) { animation-delay: 0.20s; }
+.content > *:nth-child(5) { animation-delay: 0.25s; }
+.content > *:nth-child(6) { animation-delay: 0.30s; }
+.content > *:nth-child(7) { animation-delay: 0.35s; }
+.content > *:nth-child(8) { animation-delay: 0.40s; }
+.content > *:nth-child(9) { animation-delay: 0.45s; }
+.content > *:nth-child(10) { animation-delay: 0.50s; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (min-width: 600px) { .tools-grid { grid-template-columns: 1fr 1fr; } .stat-strip { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="glow-top"></div>
+<div class="glow-bottom"></div>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-brand">GENAI Architect <span>B9</span></span>
+  <span class="nav-badge">W1 · Day 02 / 6W</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="eyebrow">Week 1 · Day 2 · Learning in Public</p>
+  <div class="hero-counter">02<sup>/ 6W</sup></div>
+  <p class="hero-slash">Week 1, Day 02 <span>/ 6 Weeks</span></p>
+  <h1 class="hero-title">Why Manual Coding Still Matters — and <em>Python Basics</em></h1>
+  <p class="hero-summary">
+    Before writing a single line of AI code, we need to understand why. Thiru walked us through
+    the history of GenAI, the importance of manual coding, and exactly what Python we need —
+    and don't need — for this course.
+  </p>
+  <div>
+    <div class="progress-meta">
+      <span class="progress-meta-label">6-Week Journey</span>
+      <span class="progress-pct">4.44% complete</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressBar"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <hr class="divider">
+
+  <!-- THIRU'S STORY -->
+  <p class="section-label">Thiru's Story — Why Manual Coding First</p>
+
+  <div class="story-card" style="margin-bottom:12px;">
+    <p class="story-eyebrow">Thiru — NLP, Deep Learning & Machine Learning Background</p>
+    <p class="story-body">
+      When Thiru started in the field — working in <strong>NLP, Deep Learning, and Machine Learning</strong> —
+      there was no ChatGPT. There was no GenAI. Everything was written by hand, manually, line by line.<br><br>
+      <strong>2022</strong> is when GenAI arrived. But it only became truly mature <strong>after 2023</strong>,
+      once the <em>SDE Benchmark was achieved</em> — the point at which AI surpassed human-level performance
+      in logical thinking and reasoning, especially in Python.<br><br>
+      <strong>Only after that milestone did Thiru start using AI-assisted coding.</strong>
+      That is the right order. Learn the foundation first. Then use AI as an amplifier.
+    </p>
+    <p class="story-attr">— <strong>Thiru</strong>, GENAI Architect Tutor</p>
+  </div>
+
+  <!-- THE KEY QUESTION -->
+  <div class="highlight-box" style="margin-bottom:56px;">
+    <div class="highlight-title">💡 Thiru's Question to the Cohort</div>
+    <p class="highlight-body">
+      <strong>"Can we do AI-assisted coding now?"</strong><br><br>
+      <strong>Yes — we can.</strong> But before that, we need to <strong>understand the concepts</strong>
+      well enough to know where to restrict, guide, and correct the AI in our code.
+      Without concept clarity, you cannot use AI effectively or safely.
+    </p>
+  </div>
+
+  <!-- PYTHON SCALE STATS -->
+  <p class="section-label">The Scale of Python</p>
+  <div class="stat-strip">
+    <div class="stat-card">
+      <div class="stat-num">10K+</div>
+      <div class="stat-label">Concepts in Python<br>we won't learn all of them</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">15K+</div>
+      <div class="stat-label">Packages & Modules<br>available in Python</div>
+    </div>
+  </div>
+
+  <!-- WHAT WE WILL BUILD -->
+  <p class="section-label">What We Can Build Using Python</p>
+  <div style="margin-bottom:56px;">
+    <div class="task-card setup">
+      <div class="task-num">📱</div>
+      <div>
+        <div class="task-title">AI Mobile Apps</div>
+        <div class="task-sub">Building mobile-first AI experiences using Python as the backbone.</div>
+      </div>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">🌐</div>
+      <div>
+        <div class="task-title">AI Web Apps</div>
+        <div class="task-sub">Web applications powered by GenAI — the most in-demand skill right now.</div>
+      </div>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">🎮</div>
+      <div>
+        <div class="task-title">AI Games</div>
+        <div class="task-sub">Interactive experiences built with AI logic at the core.</div>
+      </div>
+    </div>
+    <div class="highlight-box" style="margin-top:10px;">
+      <div class="highlight-title">🎯 Our Approach</div>
+      <p class="highlight-body">
+        We are <strong>not going to learn all of Python</strong>. We will learn
+        <strong>only what is needed</strong> to build these three things. Focused, practical, purposeful.
+      </p>
+    </div>
+  </div>
+
+  <!-- TODAY'S CLASS VIDEOS -->
+  <p class="section-label">Day 2 Class Videos</p>
+  <div style="margin-bottom:56px;">
+    <p class="group-label">Watch All Day 2 Class Videos — Available on Skool Platform</p>
+    <div class="task-card setup">
+      <div class="task-num">01</div>
+      <div>
+        <div class="task-title">Virtual Environment Creation</div>
+        <div class="task-sub">How to set up an isolated Python environment — discussed in detail in the video.</div>
+      </div>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">02</div>
+      <div>
+        <div class="task-title">Python Operations, Modules & Functions</div>
+        <div class="task-sub">Core Python building blocks. We will use Python functions <strong>widely throughout this course</strong>.</div>
+      </div>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">03</div>
+      <div>
+        <div class="task-title">Python Assignment PDF</div>
+        <div class="task-sub">Everything is <strong>clearly explained</strong> in the assignment PDF. Watch all the videos first, then complete the assignment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 2 TASKS -->
+  <p class="section-label">Day 2 Tasks</p>
+  <div style="margin-bottom:56px;">
+    <div class="task-card setup">
+      <div class="task-num">T1</div>
+      <div>
+        <div class="task-title">Watch All Class Videos on Skool</div>
+        <div class="task-sub">Go through all session videos fully before attempting the assignment.</div>
+      </div>
+      <span class="task-tag tag-cobalt">Do First</span>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">T2</div>
+      <div>
+        <div class="task-title">Complete the Python Assignment</div>
+        <div class="task-sub">Follow the assignment PDF — everything is clearly explained inside.</div>
+      </div>
+      <span class="task-tag tag-cobalt">Task</span>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">T3</div>
+      <div>
+        <div class="task-title">Upload to a New Public GitHub Repo & Share Link</div>
+        <div class="task-sub">
+          Create a <strong>new repository</strong> → set visibility to <strong>Public</strong> →
+          drag & drop your assignment files → copy the <strong>HTTPS URL</strong> →
+          share in the <strong>WhatsApp group</strong>.
+        </div>
+      </div>
+      <span class="task-tag tag-cobalt">Submit</span>
+    </div>
+    <div class="task-card pre">
+      <div class="task-num">!</div>
+      <div>
+        <div class="task-title">GitHub Account — If Not Done Yet</div>
+        <div class="task-sub">Create your GitHub account before submitting the assignment. Don't skip this.</div>
+      </div>
+      <span class="task-tag tag-coral">Pending</span>
+    </div>
+  </div>
+
+  <!-- SYNC UP CALLS -->
+  <p class="section-label">How Sync-Up Calls Work</p>
+  <div class="sync-card">
+    <div class="sync-title">📅 Purpose of Daily Sync-Up Calls</div>
+    <div class="sync-item">
+      <span class="sync-num">1</span>
+      <span>Set the <strong>agenda for the day</strong> — what we need to cover and complete.</span>
+    </div>
+    <div class="sync-item">
+      <span class="sync-num">2</span>
+      <span><strong>Clarify all doubts</strong> before proceeding to the next day.</span>
+    </div>
+    <div class="sync-item">
+      <span class="sync-num">3</span>
+      <span>Want to move fast? Go ahead and <strong>watch future day videos</strong>. But ask doubts about those topics <strong>only on the relevant day</strong> — to avoid confusion for others.</span>
+    </div>
+  </div>
+
+  <!-- CONCEPTS -->
+  <p class="section-label">Concepts Introduced</p>
+  <div class="pills">
+    <span class="pill p-cobalt">Virtual Environment</span>
+    <span class="pill p-cobalt">Python Modules</span>
+    <span class="pill p-cobalt">Python Functions</span>
+    <span class="pill p-cobalt">Python Operations</span>
+    <span class="pill p-white">Public Repository</span>
+    <span class="pill p-white">HTTPS URL</span>
+    <span class="pill p-white">.ipynb Files</span>
+    <span class="pill p-coral">API Key Security</span>
+    <span class="pill p-cobalt">SDE AI Benchmark</span>
+    <span class="pill p-white">Manual Coding Importance</span>
+    <span class="pill p-cobalt">AI-Assisted Coding</span>
+  </div>
+
+  <!-- TOOLS -->
+  <p class="section-label">Tools & Resources</p>
+  <div class="tools-grid">
+    <a href="https://github.com/manojkanur/genai-program" target="_blank" class="tool-item">
+      <div class="tool-icon">🐙</div>
+      <div><div class="tool-name">Manoj's GitHub Repo</div><div class="tool-desc">Assignment reference & materials</div></div>
+    </a>
+    <a href="https://doubt.socialeagle.ai/" target="_blank" class="tool-item">
+      <div class="tool-icon">🦅</div>
+      <div><div class="tool-name">Doubt Portal</div><div class="tool-desc">doubt.socialeagle.ai</div></div>
+    </a>
+    <a href="https://python.org" target="_blank" class="tool-item">
+      <div class="tool-icon">🐍</div>
+      <div><div class="tool-name">Python</div><div class="tool-desc">python.org</div></div>
+    </a>
+    <a href="https://code.visualstudio.com" target="_blank" class="tool-item">
+      <div class="tool-icon">💻</div>
+      <div><div class="tool-name">VSCode</div><div class="tool-desc">Primary code editor</div></div>
+    </a>
+  </div>
+
+  <!-- SECURITY NOTE -->
+  <div class="warn-card" style="margin-bottom:56px;">
+    <div class="warn-title">🔐 Important — Never Commit an API Key in Your Code</div>
+    <p class="warn-body">
+      We will use API Keys in future sessions.
+      <strong>Never push your API key directly into code or into a GitHub repository.</strong>
+      More details will be covered on the relevant day.
+    </p>
+  </div>
+
+  <!-- MANTRA -->
+  <div class="mantra">
+    <p class="mantra-label">Cohort Mantra</p>
+    <p class="mantra-text">WE ARE<br>SYSTEM BUILDERS.</p>
+  </div>
+
+  <!-- DOUBT PROTOCOL -->
+  <p class="section-label">Access & Doubt Protocol</p>
+  <div class="warn-card" style="margin-bottom:12px;">
+    <div class="warn-title">⚠ Don't Have Course Access Yet?</div>
+    <p class="warn-body">By now <strong>all members should have course access</strong>. If you still don't — reach out to <strong>Sakeel immediately</strong>. Don't wait.</p>
+  </div>
+  <div class="community-card" style="margin-top:12px;">
+    <div class="community-title">💬 Community & Doubt Protocol</div>
+    <p class="community-body">
+      Try to solve every problem yourself first — that's how you build a real <strong>debugging skill</strong>.
+      That skill is what this entire course is training you toward.<br><br>
+      Speak to your cohort in the <strong>WhatsApp group</strong> first.
+      For escalations, post on: <a href="https://doubt.socialeagle.ai/" target="_blank">doubt.socialeagle.ai</a><br><br>
+      <strong>Any doubts? Ask. Don't hesitate.</strong>
+    </p>
+  </div>
+
+  <!-- FINAL NOTE -->
+  <div class="final-note">
+    <p class="headline">Don't hesitate. <em>Ask every doubt.</em></p>
+    <p class="sub">The cohort grows together — one commit at a time.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-brand">GENAI Architect <span>B9</span></span>
+  <span class="footer-meta">Week 1 · Day 02 of 6W · 2026</span>
+</footer>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('progressBar').style.width = '4.44%';
+    }, 400);
+  });
+</script>
+
+</body>
+</html>
