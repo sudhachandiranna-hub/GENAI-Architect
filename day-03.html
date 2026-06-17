@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 03 / 6W — GENAI Architect B9</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cobalt: #1B4FFF;
+  --cobalt-light: #4B73FF;
+  --coral: #FF4444;
+  --coral-light: #FF7070;
+  --ink: #0E0E12;
+  --ink2: #F4F6FF;
+  --ink3: #E8ECF8;
+  --white: #FFFFFF;
+  --muted: #6B6B82;
+  --border: rgba(27,79,255,0.10);
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
+
+.glow-top { position: fixed; top: -200px; right: -150px; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(27,79,255,0.18) 0%, transparent 65%); pointer-events: none; z-index: 0; }
+.glow-bottom { position: fixed; bottom: -150px; left: -100px; width: 450px; height: 450px; border-radius: 50%; background: radial-gradient(circle, rgba(255,68,68,0.1) 0%, transparent 65%); pointer-events: none; z-index: 0; }
+
+/* NAV */
+nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(18px); border-bottom: 1px solid #E5E8F0; padding: 15px 28px; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 15px; color: var(--ink); }
+.nav-brand span { color: var(--cobalt); }
+.nav-badge { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; color: var(--white); background: var(--cobalt); padding: 5px 14px; border-radius: 100px; }
+
+/* HERO */
+.hero { position: relative; z-index: 1; padding: 72px 28px 56px; max-width: 760px; margin: 0 auto; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--cobalt); margin-bottom: 22px; opacity: 0.9; }
+.eyebrow::before { content: ''; display: block; width: 20px; height: 2px; background: var(--cobalt); border-radius: 2px; }
+.hero-counter { font-family: 'Space Grotesk', sans-serif; font-size: clamp(96px, 23vw, 168px); font-weight: 800; line-height: 0.85; letter-spacing: -5px; color: var(--ink); margin-bottom: 6px; }
+.hero-counter sup { font-size: 0.22em; letter-spacing: -1px; color: var(--coral); vertical-align: super; margin-left: 4px; }
+.hero-slash { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: var(--muted); margin-bottom: 20px; }
+.hero-slash span { color: var(--cobalt); font-weight: 700; }
+.hero-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(22px, 5vw, 34px); font-weight: 800; line-height: 1.15; letter-spacing: -0.8px; margin-bottom: 16px; max-width: 540px; color: var(--ink); }
+.hero-title em { font-style: normal; color: var(--cobalt); }
+.hero-summary { font-size: 15px; color: var(--muted); max-width: 500px; line-height: 1.8; margin-bottom: 42px; }
+
+/* PROGRESS */
+.progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.progress-meta-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.progress-pct { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; color: var(--cobalt); }
+.progress-track { height: 6px; background: #E5E8F0; border-radius: 100px; overflow: visible; position: relative; }
+.progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--cobalt), var(--cobalt-light)); border-radius: 100px; transition: width 1.4s cubic-bezier(.16,1,.3,1); position: relative; }
+.progress-fill::after { content: ''; position: absolute; right: -2px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; background: var(--cobalt); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 3px rgba(27,79,255,0.35); }
+
+/* LAYOUT */
+.divider { border: none; border-top: 1px solid #E5E8F0; margin: 52px 0; }
+.content { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 28px; }
+.section-label { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--cobalt); margin-bottom: 24px; display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: rgba(27,79,255,0.06); border-radius: 8px; border-left: 3px solid var(--cobalt); width: fit-content; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: transparent; }
+.group-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 4px 0 13px 2px; opacity: 0.6; }
+
+/* TASK CARDS */
+.task-card { display: flex; align-items: flex-start; gap: 16px; padding: 20px 22px; border-radius: 14px; margin-bottom: 10px; background: var(--ink2); border: 1px solid var(--border); transition: border-color 0.22s, transform 0.18s; }
+.task-card:hover { transform: translateX(5px); }
+.task-card.pre { border-left: 3px solid var(--coral); }
+.task-card.pre:hover { border-color: var(--coral); }
+.task-card.setup { border-left: 3px solid var(--cobalt); }
+.task-card.setup:hover { border-color: var(--cobalt); }
+.task-num { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 800; width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+.task-card.pre .task-num { background: rgba(255,68,68,0.15); color: var(--coral); border: 1px solid rgba(255,68,68,0.3); }
+.task-card.setup .task-num { background: rgba(27,79,255,0.15); color: var(--cobalt-light); border: 1px solid rgba(27,79,255,0.3); }
+.task-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+.task-sub { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.task-sub a { color: var(--cobalt-light); text-decoration: underline; text-underline-offset: 3px; }
+.task-sub strong { color: var(--ink); }
+.task-tag { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; margin-left: auto; flex-shrink: 0; align-self: flex-start; margin-top: 3px; }
+.tag-coral { color: var(--coral); background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.25); }
+.tag-cobalt { color: var(--cobalt-light); background: rgba(27,79,255,0.12); border: 1px solid rgba(27,79,255,0.28); }
+
+/* STORY CARD */
+.story-card { border-radius: 18px; padding: 32px 30px; margin-bottom: 16px; background: var(--ink2); border: 1px solid var(--border); border-top: 3px solid var(--cobalt); position: relative; overflow: hidden; }
+.story-card::after { content: '"'; position: absolute; top: -24px; right: 22px; font-family: 'Space Grotesk', sans-serif; font-size: 160px; font-weight: 800; color: var(--cobalt); opacity: 0.07; line-height: 1; pointer-events: none; }
+.story-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--cobalt); margin-bottom: 14px; }
+.story-body { font-size: 14px; color: #444; line-height: 1.85; position: relative; z-index: 1; }
+.story-body strong { color: var(--ink); font-weight: 600; }
+.story-body em { font-style: normal; color: var(--cobalt); font-weight: 600; }
+.story-attr { font-size: 12px; color: var(--muted); margin-top: 16px; }
+.story-attr strong { color: var(--ink); }
+
+/* HIGHLIGHT BOX */
+.highlight-box { border-radius: 14px; padding: 22px 24px; margin-bottom: 10px; background: rgba(27,79,255,0.05); border: 1px solid rgba(27,79,255,0.18); border-left: 3px solid var(--cobalt); }
+.highlight-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--cobalt); margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+.highlight-body { font-size: 14px; color: #444; line-height: 1.75; }
+.highlight-body strong { color: var(--ink); }
+
+/* WARN */
+.warn-card { border-radius: 14px; padding: 20px 22px; margin-bottom: 10px; background: rgba(255,68,68,0.05); border: 1px solid rgba(255,68,68,0.18); border-left: 3px solid var(--coral); }
+.warn-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--coral); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.warn-body { font-size: 13px; color: #555; line-height: 1.65; }
+.warn-body strong { color: var(--ink); }
+
+/* WISDOM SECTION — special mentor wisdom cards */
+.wisdom-section { margin-bottom: 56px; }
+.wisdom-card {
+  border-radius: 16px; padding: 26px 26px; margin-bottom: 12px;
+  background: linear-gradient(135deg, rgba(27,79,255,0.04) 0%, rgba(255,68,68,0.03) 100%);
+  border: 1px solid var(--border); border-left: 3px solid var(--cobalt);
+}
+.wisdom-icon { font-size: 22px; margin-bottom: 10px; display: block; }
+.wisdom-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+.wisdom-body { font-size: 14px; color: #444; line-height: 1.8; }
+.wisdom-body strong { color: var(--cobalt); font-weight: 600; }
+.wisdom-attr { font-size: 11px; color: var(--muted); margin-top: 10px; font-style: italic; }
+
+/* RECIPE ANALOGY CARD */
+.recipe-card { border-radius: 16px; padding: 28px 26px; margin-bottom: 56px; background: var(--ink2); border: 1px solid var(--border); border-top: 3px solid var(--coral); }
+.recipe-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 800; color: var(--coral); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.recipe-compare { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+.recipe-method { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.recipe-method-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.recipe-method-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+.recipe-tech { font-size: 13px; color: var(--cobalt); font-weight: 600; margin-top: 6px; }
+.recipe-footer { font-size: 13px; color: #444; line-height: 1.75; padding-top: 14px; border-top: 1px solid var(--border); }
+.recipe-footer strong { color: var(--ink); }
+
+/* REEL CARD */
+.reel-card { border-radius: 16px; padding: 26px 26px; margin-bottom: 56px; background: var(--ink2); border: 1px solid var(--border); border-left: 3px solid var(--cobalt); }
+.reel-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 800; color: var(--cobalt); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.reel-body { font-size: 14px; color: #444; line-height: 1.85; }
+.reel-body strong { color: var(--ink); font-weight: 600; }
+.reel-steps { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.reel-step { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #555; }
+.reel-step-num { font-family: 'Space Grotesk', sans-serif; font-weight: 800; color: var(--cobalt); font-size: 12px; flex-shrink: 0; }
+
+/* PILLS */
+.pills { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 56px; }
+.pill { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 16px; border-radius: 100px; border: 1px solid; transition: transform 0.15s; }
+.pill:hover { transform: scale(1.05); }
+.p-cobalt { color: var(--cobalt-light); background: rgba(27,79,255,0.10); border-color: rgba(27,79,255,0.28); }
+.p-coral  { color: var(--coral);       background: rgba(255,68,68,0.08);  border-color: rgba(255,68,68,0.28); }
+.p-white  { color: #555;               background: rgba(0,0,0,0.04);      border-color: rgba(0,0,0,0.12); }
+
+/* TOOLS */
+.tools-grid { display: grid; gap: 10px; margin-bottom: 56px; }
+.tool-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-radius: 12px; background: var(--ink2); border: 1px solid var(--border); text-decoration: none; color: var(--ink); transition: border-color 0.2s; }
+.tool-item:hover { border-color: var(--cobalt); }
+.tool-icon { width: 38px; height: 38px; border-radius: 9px; font-size: 18px; background: white; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tool-name { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; color: var(--ink); }
+.tool-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* NETWORKING CARD */
+.network-card { border-radius: 16px; padding: 28px 28px; margin-bottom: 56px; background: linear-gradient(135deg, var(--ink2) 0%, white 100%); border: 1px solid var(--border); border-top: 3px solid var(--cobalt); text-align: center; }
+.network-icon { font-size: 28px; margin-bottom: 12px; }
+.network-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 10px; }
+.network-title em { font-style: normal; color: var(--cobalt); }
+.network-body { font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 480px; margin: 0 auto; }
+
+/* MANTRA */
+.mantra { border-radius: 20px; padding: 52px 32px; text-align: center; margin-bottom: 56px; background: var(--cobalt); position: relative; overflow: hidden; }
+.mantra::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%); pointer-events: none; }
+.mantra::after { content: '⬡'; position: absolute; font-size: 260px; opacity: 0.06; top: -70px; right: -50px; color: var(--white); pointer-events: none; }
+.mantra-label { font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 12px; }
+.mantra-text { font-family: 'Space Grotesk', sans-serif; font-size: clamp(22px, 5vw, 34px); font-weight: 800; color: var(--white); letter-spacing: -0.8px; line-height: 1.2; }
+
+/* MANTRA STRIP — multiple small mantras */
+.mantra-strip { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 56px; }
+.mini-mantra { background: var(--ink2); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
+.mini-mantra-icon { font-size: 18px; margin-bottom: 8px; display: block; }
+.mini-mantra-text { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.mini-mantra-text em { font-style: normal; color: var(--cobalt); }
+.mini-mantra-sub { font-size: 12px; color: var(--muted); }
+
+/* COMMUNITY */
+.community-card { border-radius: 14px; padding: 26px 26px; margin-bottom: 56px; background: var(--ink2); border: 1px solid var(--border); border-left: 3px solid var(--cobalt); }
+.community-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 800; color: var(--cobalt); margin-bottom: 13px; display: flex; align-items: center; gap: 8px; }
+.community-body { font-size: 14px; color: #444; line-height: 1.85; }
+.community-body strong { color: var(--ink); font-weight: 600; }
+.community-body a { color: var(--cobalt-light); text-decoration: underline; text-underline-offset: 3px; }
+
+/* FINAL NOTE */
+.final-note { text-align: center; padding: 28px 20px 0; margin-bottom: 52px; }
+.final-note .headline { font-family: 'Space Grotesk', sans-serif; font-size: clamp(18px, 3.5vw, 24px); font-weight: 800; color: var(--ink); }
+.final-note .headline em { font-style: normal; color: var(--cobalt-light); }
+.final-note .sub { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+/* FOOTER */
+footer { border-top: 1px solid #E5E8F0; padding: 26px 28px; max-width: 760px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: relative; z-index: 1; }
+.footer-brand { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--ink); }
+.footer-brand span { color: var(--cobalt); }
+.footer-meta { font-size: 12px; color: var(--muted); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.hero { animation: fadeUp 0.65s ease both; }
+.content > * { animation: fadeUp 0.65s ease both; }
+.content > *:nth-child(1) { animation-delay: 0.05s; }
+.content > *:nth-child(2) { animation-delay: 0.10s; }
+.content > *:nth-child(3) { animation-delay: 0.15s; }
+.content > *:nth-child(4) { animation-delay: 0.20s; }
+.content > *:nth-child(5) { animation-delay: 0.25s; }
+.content > *:nth-child(6) { animation-delay: 0.30s; }
+.content > *:nth-child(7) { animation-delay: 0.35s; }
+.content > *:nth-child(8) { animation-delay: 0.40s; }
+.content > *:nth-child(9) { animation-delay: 0.45s; }
+.content > *:nth-child(10) { animation-delay: 0.50s; }
+.content > *:nth-child(11) { animation-delay: 0.55s; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (min-width: 600px) { .tools-grid { grid-template-columns: 1fr 1fr; } .recipe-compare { grid-template-columns: 1fr 1fr; } .mantra-strip { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="glow-top"></div>
+<div class="glow-bottom"></div>
+
+<!-- NAV -->
+<nav>
+  <div style="display:flex; align-items:center; gap:14px;">
+    <a href="index.html" style="font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:700; color:#6B6B82; text-decoration:none; display:flex; align-items:center; gap:4px;">← All Days</a>
+    <span class="nav-brand">GENAI Architect <span>B9</span></span>
+  </div>
+  <span class="nav-badge">W1 · Day 03 / 6W</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="eyebrow">Week 1 · Day 3 · Learning in Public</p>
+  <div class="hero-counter">03<sup>/ 6W</sup></div>
+  <p class="hero-slash">Week 1, Day 03 <span>/ 6 Weeks</span></p>
+  <h1 class="hero-title">Introduction to <em>RPA</em> — The Bridge to AI Automation</h1>
+  <p class="hero-summary">
+    Before we touch AI-based automation, we need to understand where automation came from —
+    RPA, PyAutoGUI, and Playwright. Plus a generous helping of mentor wisdom, served with a biryani analogy.
+  </p>
+  <div>
+    <div class="progress-meta">
+      <span class="progress-meta-label">6-Week Journey</span>
+      <span class="progress-pct">Week 1 · Day 3 of 6W</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressBar"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <hr class="divider">
+
+  <!-- WHAT IS RPA -->
+  <p class="section-label">Today's Core Topic — RPA</p>
+  <div style="margin-bottom:56px;">
+    <div class="task-card setup">
+      <div class="task-num">01</div>
+      <div>
+        <div class="task-title">RPA = Robotic Process Automation</div>
+        <div class="task-sub">A framework built on Python. <strong>Mandatory</strong> to understand before entering AI-based automation — this is the foundation everything else builds on.</div>
+      </div>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">02</div>
+      <div>
+        <div class="task-title">PyAutoGUI — UI Automation Framework</div>
+        <div class="task-sub">It's a script — a set of instructions that execute one after another. It takes over your mouse and keyboard to perform tasks automatically.</div>
+      </div>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">03</div>
+      <div>
+        <div class="task-title">Before AI, Automation Meant Manual Scripting</div>
+        <div class="task-sub">Almost all automation — basic mouse operations, keyboard functions — was done using Python scripts. No AI involved. Just precise, hardcoded instructions.</div>
+      </div>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">04</div>
+      <div>
+        <div class="task-title">Playwright — Advanced Browser Automation</div>
+        <div class="task-sub">An advanced version of Selenium, used for web browser-based automation: LinkedIn post automation and web data scraping.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY SELENIUM WAS REMOVED -->
+  <div class="highlight-box" style="margin-bottom:56px;">
+    <div class="highlight-title">🔄 Why Selenium Was Removed From the Course</div>
+    <p class="highlight-body">
+      A member asked why earlier Selenium videos are gone. Thiru clarified: based on a lot of cohort feedback,
+      <strong>people were getting confused having both frameworks taught side by side</strong> — so Selenium was removed
+      and the course now focuses purely on Playwright, its more advanced successor.
+      <strong>Whenever content is updated, an email notification goes out to all previous batches too</strong> — not just the current one.
+    </p>
+  </div>
+
+  <!-- THE BIRYANI FRAMEWORK ANALOGY -->
+  <div class="recipe-card">
+    <div class="recipe-title">🍛 Thiru's Analogy — What Is a Framework?</div>
+    <p style="font-size:14px; color:#444; line-height:1.8; margin-bottom:16px;">
+      To explain "what is a framework," Thiru used a biryani analogy — there are two ways to make biryani:
+    </p>
+    <div class="recipe-compare">
+      <div class="recipe-method">
+        <div class="recipe-method-title">🌶️ From Scratch</div>
+        <div class="recipe-method-desc">Grind your own fresh masala, source all raw materials individually, build the dish from zero.</div>
+        <div class="recipe-tech">= Writing raw code, no framework</div>
+      </div>
+      <div class="recipe-method">
+        <div class="recipe-method-title">📦 Ready-Made Masala</div>
+        <div class="recipe-method-desc">Use a pre-made biryani masala mix — proven, packaged, ready to go.</div>
+        <div class="recipe-tech">= Using a framework (PyAutoGUI, Playwright)</div>
+      </div>
+    </div>
+    <p class="recipe-footer">
+      A framework is the <strong>ready-made masala of programming</strong> — pre-built, tested structure
+      so you don't reinvent the wheel every time.
+    </p>
+  </div>
+
+  <!-- THE REEL DEMO -->
+  <div class="reel-card">
+    <div class="reel-title">🎬 The Instagram Reel — Manoj & Thiru's PyAutoGUI Food Order</div>
+    <p class="reel-body">
+      Manoj shared a recent Instagram reel: he and Thiru built a <strong>PyAutoGUI-based script that orders food via voice note</strong>.
+      The entire task — triggered by voice — runs on Swiggy automatically.
+    </p>
+    <div class="reel-steps">
+      <div class="reel-step"><span class="reel-step-num">1.</span><span>Voice note specifies the order (they wanted biryani — said "spaghetti or tomato" as a placeholder test).</span></div>
+      <div class="reel-step"><span class="reel-step-num">2.</span><span>Script opens Swiggy and picks the home location automatically.</span></div>
+      <div class="reel-step"><span class="reel-step-num">3.</span><span>It places the order and proceeds all the way to checkout.</span></div>
+      <div class="reel-step"><span class="reel-step-num">4.</span><span>Script stops at the payment page — human adds payment & confirms manually.</span></div>
+    </div>
+  </div>
+
+  <!-- MENTOR WISDOM SECTION -->
+  <p class="section-label">🌟 Mentor Wisdom — From Thiru</p>
+  <div class="wisdom-section">
+
+    <div class="wisdom-card">
+      <span class="wisdom-icon">🍲</span>
+      <div class="wisdom-title">Learn Through What You Love</div>
+      <p class="wisdom-body">
+        Thiru shared a personal habit: he loves food, and he <strong>relates everything he learns to food analogies</strong>.
+        When learning something new, he often asks ChatGPT to explain it using food/recipe comparisons — it's how his mind retains concepts. He calls it a kind of psychology.
+        His suggestion to the cohort: <strong>find what you love, and relate new learning to it</strong>. That's how you master anything.
+      </p>
+      <p class="wisdom-attr">— Thiru, on his personal learning method</p>
+    </div>
+
+    <div class="wisdom-card">
+      <span class="wisdom-icon">🔁</span>
+      <div class="wisdom-title">Make New Mistakes Every Day</div>
+      <p class="wisdom-body">
+        <strong>"I have made many mistakes — make new mistakes every day."</strong>
+        Don't repeat old mistakes, but don't fear new ones either. By solving new mistakes, you learn something new every single day. That's the actual engine of growth.
+      </p>
+      <p class="wisdom-attr">— Thiru's mantra on learning through failure</p>
+    </div>
+
+    <div class="wisdom-card">
+      <span class="wisdom-icon">⚡</span>
+      <div class="wisdom-title">Learn and Implement — Not Learn, Then Implement</div>
+      <p class="wisdom-body">
+        In this AI era, the people who win are the ones who <strong>focus more on implementation</strong>.
+        Don't wait to learn everything before you start building. <strong>Do and learn — not learn and do.</strong>
+        Implementation itself is the fastest teacher.
+      </p>
+      <p class="wisdom-attr">— Thiru's implementation-first philosophy</p>
+    </div>
+
+    <div class="wisdom-card">
+      <span class="wisdom-icon">🤖</span>
+      <div class="wisdom-title">Think of a World Without AI</div>
+      <p class="wisdom-body">
+        "In 2019, when I learned all this, it took me 6 months — with no ChatGPT to guide me, and a lot of mistakes along the way.
+        What you all are learning in a single day today is only possible because of AI."
+        Thiru asked the cohort to genuinely picture <strong>a world without ChatGPT or Claude</strong> — and realize how much leverage we have right now. Fluid intelligence — adapting and learning on the fly with AI as a partner — is becoming the real skill of this era.
+      </p>
+      <p class="wisdom-attr">— Thiru, comparing his 2019 learning journey to today</p>
+    </div>
+
+  </div>
+
+  <!-- GITHUB DEMO RECAP -->
+  <p class="section-label">GitHub Demo — Recap</p>
+  <div style="margin-bottom:56px;">
+    <div class="task-card setup">
+      <div class="task-num">①</div>
+      <div>
+        <div class="task-title">Create a Repository → Drag & Drop Files</div>
+        <div class="task-sub">Live demo repeated: create new repo, drag and drop your files directly into it.</div>
+      </div>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">②</div>
+      <div>
+        <div class="task-title">100-File Commit Limit</div>
+        <div class="task-sub">GitHub allows a <strong>maximum of 100 files per commit</strong> via drag & drop. Keep this in mind for larger uploads.</div>
+      </div>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">③</div>
+      <div>
+        <div class="task-title">Commit Changes & Share the HTTPS URL</div>
+        <div class="task-sub">After committing, copy the HTTPS URL from the Code button and share it in the WhatsApp group.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GITHUB IMPORTANCE -->
+  <div class="highlight-box" style="margin-bottom:56px;">
+    <div class="highlight-title">📌 Build Visibility</div>
+    <p class="highlight-body">
+      Uploading your work to GitHub is <strong>mandatory</strong> — it builds your visibility.
+      Your GitHub is your <strong>digital portfolio</strong>. You can use it to create your own opportunities,
+      rather than waiting for one. In today's market, applying to job postings alone isn't working well —
+      competition is heavy. Build visibility instead of just applying.
+    </p>
+  </div>
+
+  <!-- NETWORKING -->
+  <div class="network-card">
+    <div class="network-icon">🤝</div>
+    <div class="network-title">Networking Is <em>Networth</em></div>
+    <p class="network-body">
+      Do networking actively. An AI Alumni meeting is being planned for the cohort.
+      Thiru's reminder: <strong>your network determines your net worth</strong> — invest in real relationships within this community.
+    </p>
+  </div>
+
+  <!-- CONCEPTS -->
+  <p class="section-label">Concepts Introduced</p>
+  <div class="pills">
+    <span class="pill p-cobalt">RPA</span>
+    <span class="pill p-cobalt">PyAutoGUI</span>
+    <span class="pill p-cobalt">Playwright</span>
+    <span class="pill p-white">Selenium (Deprecated)</span>
+    <span class="pill p-white">Web Data Scraping</span>
+    <span class="pill p-white">Framework</span>
+    <span class="pill p-coral">Fluid Intelligence</span>
+    <span class="pill p-cobalt">100-File Commit Limit</span>
+    <span class="pill p-white">Digital Portfolio</span>
+  </div>
+
+  <!-- TOOLS -->
+  <p class="section-label">Tools & Resources</p>
+  <div class="tools-grid">
+    <a href="https://github.com/manojkanur/genai-program" target="_blank" class="tool-item">
+      <div class="tool-icon">🐙</div>
+      <div><div class="tool-name">Manoj's GitHub Repo</div><div class="tool-desc">Assignment reference & materials</div></div>
+    </a>
+    <a href="https://doubt.socialeagle.ai/" target="_blank" class="tool-item">
+      <div class="tool-icon">🦅</div>
+      <div><div class="tool-name">Doubt Portal</div><div class="tool-desc">doubt.socialeagle.ai</div></div>
+    </a>
+    <a href="https://playwright.dev" target="_blank" class="tool-item">
+      <div class="tool-icon">🎭</div>
+      <div><div class="tool-name">Playwright</div><div class="tool-desc">playwright.dev</div></div>
+    </a>
+    <a href="https://pyautogui.readthedocs.io" target="_blank" class="tool-item">
+      <div class="tool-icon">🖱️</div>
+      <div><div class="tool-name">PyAutoGUI</div><div class="tool-desc">UI automation docs</div></div>
+    </a>
+  </div>
+
+  <!-- CHECK-IN NOTE -->
+  <div class="story-card" style="margin-bottom:56px;">
+    <p class="story-eyebrow">Today's Check-In</p>
+    <p class="story-body">
+      Thiru checked in on how everyone's Python basics recordings went — asking if there were any hiccups.
+      His ask: <em>maintain the same energy all the way to the end.</em>
+      For people from a non-tech background — if any content feels heavy, <strong>watch the video twice or thrice</strong>. That's expected, not a weakness.
+    </p>
+  </div>
+
+  <!-- MANTRA -->
+  <div class="mantra">
+    <p class="mantra-label">Cohort Mantra</p>
+    <p class="mantra-text">WE ARE<br>SYSTEM BUILDERS.</p>
+  </div>
+
+  <!-- DOUBT PROTOCOL -->
+  <p class="section-label">Doubt Protocol</p>
+  <div class="community-card">
+    <div class="community-title">💬 Community & Doubt Protocol</div>
+    <p class="community-body">
+      Try to solve every problem yourself first — that's how you build a real <strong>debugging skill</strong>.<br><br>
+      Speak to your cohort in the <strong>WhatsApp group</strong> first.
+      For escalations, post on: <a href="https://doubt.socialeagle.ai/" target="_blank">doubt.socialeagle.ai</a><br><br>
+      <strong>Any doubts? Ask. Don't hesitate.</strong>
+    </p>
+  </div>
+
+  <!-- FINAL NOTE -->
+  <div class="final-note">
+    <p class="headline">Don't lose your energy. <em>Keep building.</em></p>
+    <p class="sub">The cohort grows together — one commit at a time.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-brand">GENAI Architect <span>B9</span></span>
+  <span class="footer-meta">Week 1 · Day 03 of 6W · 2024</span>
+</footer>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('progressBar').style.width = '6.67%';
+    }, 400);
+  });
+</script>
+
+</body>
+</html>
