@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2, Day 9 — GENAI Architect Eagle's Way</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cobalt: #1B4FFF; --cobalt-light: #4B73FF; --coral: #FF4444; --coral-light: #FF7070;
+  --ink: #0E0E12; --ink2: #F4F6FF; --ink3: #E8ECF8; --white: #FFFFFF; --muted: #6B6B82;
+  --border: rgba(27,79,255,0.10);
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
+.glow-top { position: fixed; top: -200px; right: -150px; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(27,79,255,0.18) 0%, transparent 65%); pointer-events: none; z-index: 0; }
+.glow-bottom { position: fixed; bottom: -150px; left: -100px; width: 450px; height: 450px; border-radius: 50%; background: radial-gradient(circle, rgba(255,68,68,0.1) 0%, transparent 65%); pointer-events: none; z-index: 0; }
+nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(18px); border-bottom: 1px solid #E5E8F0; padding: 15px 28px; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 15px; color: var(--ink); }
+.nav-brand span { color: var(--cobalt); }
+.nav-badge { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; color: var(--white); background: var(--cobalt); padding: 5px 14px; border-radius: 100px; }
+.hero { position: relative; z-index: 1; padding: 72px 28px 56px; max-width: 760px; margin: 0 auto; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--cobalt); margin-bottom: 22px; opacity: 0.9; }
+.eyebrow::before { content: ''; display: block; width: 20px; height: 2px; background: var(--cobalt); border-radius: 2px; }
+.hero-counter { font-family: 'Space Grotesk', sans-serif; font-size: clamp(96px, 23vw, 168px); font-weight: 800; line-height: 0.85; letter-spacing: -5px; color: var(--ink); margin-bottom: 6px; }
+.hero-counter sup { font-size: 0.22em; letter-spacing: -1px; color: var(--coral); vertical-align: super; margin-left: 4px; }
+.hero-slash { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: var(--muted); margin-bottom: 20px; }
+.hero-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(22px, 5vw, 34px); font-weight: 800; line-height: 1.15; letter-spacing: -0.8px; margin-bottom: 16px; max-width: 540px; color: var(--ink); }
+.hero-title em { font-style: normal; color: var(--cobalt); }
+.hero-summary { font-size: 15px; color: var(--muted); max-width: 500px; line-height: 1.8; margin-bottom: 42px; }
+.progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.progress-meta-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.progress-pct { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; color: var(--cobalt); }
+.progress-track { height: 6px; background: #E5E8F0; border-radius: 100px; overflow: visible; position: relative; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--cobalt), var(--cobalt-light)); border-radius: 100px; transition: width 1.4s cubic-bezier(.16,1,.3,1); position: relative; }
+.progress-fill::after { content: ''; position: absolute; right: -2px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; background: var(--cobalt); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 3px rgba(27,79,255,0.35); }
+.divider { border: none; border-top: 1px solid #E5E8F0; margin: 52px 0; }
+.content { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 28px; }
+.section-label { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--cobalt); margin-bottom: 24px; display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: rgba(27,79,255,0.06); border-radius: 8px; border-left: 3px solid var(--cobalt); width: fit-content; }
+.task-card { display: flex; align-items: flex-start; gap: 16px; padding: 20px 22px; border-radius: 14px; margin-bottom: 10px; background: var(--ink2); border: 1px solid var(--border); transition: border-color 0.22s, transform 0.18s; }
+.task-card:hover { transform: translateX(5px); }
+.task-card.setup { border-left: 3px solid var(--cobalt); }
+.task-card.setup:hover { border-color: var(--cobalt); }
+.task-card.coral-card { border-left: 3px solid var(--coral); }
+.task-num { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 800; width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+.task-card.setup .task-num { background: rgba(27,79,255,0.15); color: var(--cobalt-light); border: 1px solid rgba(27,79,255,0.3); }
+.task-card.coral-card .task-num { background: rgba(255,68,68,0.15); color: var(--coral); border: 1px solid rgba(255,68,68,0.3); }
+.task-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+.task-sub { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.task-sub strong { color: var(--ink); }
+.task-sub code { background: var(--ink3); padding: 2px 6px; border-radius: 5px; font-family: monospace; font-size: 12px; color: var(--cobalt); }
+
+/* FRAMEWORK COMPARISON CARD */
+.compare-card { border-radius: 16px; padding: 28px 26px; margin-bottom: 56px; background: var(--ink2); border: 1px solid var(--border); border-top: 3px solid var(--cobalt); }
+.compare-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 800; color: var(--cobalt); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.compare-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+.compare-item { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.compare-item.advanced { border: 1.5px solid var(--coral); background: rgba(255,68,68,0.03); }
+.compare-name { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.compare-tag { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; background: rgba(27,79,255,0.1); color: var(--cobalt); }
+.compare-tag.advanced-tag { background: rgba(255,68,68,0.1); color: var(--coral); }
+.compare-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: 4px; }
+.compare-footer { font-size: 13px; color: #444; line-height: 1.75; padding-top: 14px; border-top: 1px solid var(--border); }
+.compare-footer strong { color: var(--ink); }
+
+/* MARKDOWN CARD */
+.md-card { border-radius: 16px; padding: 26px 26px; margin-bottom: 56px; background: var(--ink2); border: 1px solid var(--border); border-left: 3px solid var(--cobalt); }
+.md-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 800; color: var(--cobalt); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.md-body { font-size: 14px; color: #444; line-height: 1.8; }
+.md-body strong { color: var(--ink); }
+
+.highlight-box { border-radius: 14px; padding: 22px 24px; margin-bottom: 10px; background: rgba(27,79,255,0.05); border: 1px solid rgba(27,79,255,0.18); border-left: 3px solid var(--cobalt); }
+.highlight-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--cobalt); margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+.highlight-body { font-size: 14px; color: #444; line-height: 1.75; }
+.highlight-body strong { color: var(--ink); }
+
+.pills { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 56px; }
+.pill { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 16px; border-radius: 100px; border: 1px solid; }
+.p-cobalt { color: var(--cobalt-light); background: rgba(27,79,255,0.10); border-color: rgba(27,79,255,0.28); }
+.p-coral  { color: var(--coral);       background: rgba(255,68,68,0.08);  border-color: rgba(255,68,68,0.28); }
+.p-white  { color: #555;               background: rgba(0,0,0,0.04);      border-color: rgba(0,0,0,0.12); }
+
+.tools-grid { display: grid; gap: 10px; margin-bottom: 56px; }
+.tool-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-radius: 12px; background: var(--ink2); border: 1px solid var(--border); text-decoration: none; color: var(--ink); transition: border-color 0.2s; }
+.tool-item:hover { border-color: var(--cobalt); }
+.tool-icon { width: 38px; height: 38px; border-radius: 9px; font-size: 18px; background: white; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tool-name { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; color: var(--ink); }
+.tool-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.mantra { border-radius: 20px; padding: 52px 32px; text-align: center; margin-bottom: 56px; background: var(--cobalt); position: relative; overflow: hidden; }
+.mantra::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%); pointer-events: none; }
+.mantra::after { content: '⬡'; position: absolute; font-size: 260px; opacity: 0.06; top: -70px; right: -50px; color: var(--white); pointer-events: none; }
+.mantra-label { font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 12px; }
+.mantra-text { font-family: 'Space Grotesk', sans-serif; font-size: clamp(22px, 5vw, 34px); font-weight: 800; color: var(--white); letter-spacing: -0.8px; line-height: 1.2; }
+
+.community-card { border-radius: 14px; padding: 26px 26px; margin-bottom: 56px; background: var(--ink2); border: 1px solid var(--border); border-left: 3px solid var(--cobalt); }
+.community-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 800; color: var(--cobalt); margin-bottom: 13px; display: flex; align-items: center; gap: 8px; }
+.community-body { font-size: 14px; color: #444; line-height: 1.85; }
+.community-body strong { color: var(--ink); font-weight: 600; }
+.community-body a { color: var(--cobalt-light); text-decoration: underline; text-underline-offset: 3px; }
+.community-body code { background: white; padding: 2px 7px; border-radius: 5px; font-family: monospace; font-size: 13px; color: var(--cobalt); border: 1px solid var(--border); }
+
+.final-note { text-align: center; padding: 28px 20px 0; margin-bottom: 52px; }
+.final-note .headline { font-family: 'Space Grotesk', sans-serif; font-size: clamp(18px, 3.5vw, 24px); font-weight: 800; color: var(--ink); }
+.final-note .headline em { font-style: normal; color: var(--cobalt-light); }
+.final-note .sub { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+footer { border-top: 1px solid #E5E8F0; padding: 26px 28px; max-width: 760px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: relative; z-index: 1; }
+.footer-brand { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--ink); }
+.footer-brand span { color: var(--cobalt); }
+.footer-meta { font-size: 12px; color: var(--muted); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.hero { animation: fadeUp 0.65s ease both; }
+.content > * { animation: fadeUp 0.65s ease both; }
+.content > *:nth-child(1) { animation-delay: 0.05s; } .content > *:nth-child(2) { animation-delay: 0.10s; }
+.content > *:nth-child(3) { animation-delay: 0.15s; } .content > *:nth-child(4) { animation-delay: 0.20s; }
+.content > *:nth-child(5) { animation-delay: 0.25s; } .content > *:nth-child(6) { animation-delay: 0.30s; }
+.content > *:nth-child(7) { animation-delay: 0.35s; } .content > *:nth-child(8) { animation-delay: 0.40s; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (min-width: 600px) { .tools-grid { grid-template-columns: 1fr 1fr; } .compare-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="glow-top"></div>
+<div class="glow-bottom"></div>
+
+<nav>
+  <div style="display:flex; align-items:center; gap:14px;">
+    <a href="index.html" style="font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:700; color:#6B6B82; text-decoration:none; display:flex; align-items:center; gap:4px;">← All Days</a>
+    <span class="nav-brand">GENAI Architect <span>B9</span></span>
+  </div>
+  <span class="nav-badge">Week 2 · Day 9</span>
+</nav>
+
+<section class="hero">
+  <p class="eyebrow">Week 2 · Day 9 · Learning in Public</p>
+  <div class="hero-counter">09<sup>/ 6W</sup></div>
+  <p class="hero-slash">Week 2, Day 9</p>
+  <h1 class="hero-title">JSON Prompting & <em>Markdown Prompts</em></h1>
+  <p class="hero-summary">
+    Today is JSON Prompting Day. We learned why JSON gives far more detail and control than plain text —
+    especially for image and video generation — and wrapped up prompting basics with Markdown prompt format.
+  </p>
+  <div>
+    <div class="progress-meta">
+      <span class="progress-meta-label">6-Week Journey</span>
+      <span class="progress-pct">Week 2 · Day 9 of 6W · 9/45 (20%)</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressBar" style="width: 20%;"></div>
+    </div>
+  </div>
+</section>
+
+<div class="content">
+
+  <hr class="divider">
+
+  <!-- TODAY'S TOPIC -->
+  <p class="section-label">Today's Core Topic — JSON Prompting</p>
+  <div style="margin-bottom:12px;">
+    <div class="task-card setup">
+      <div class="task-num">01</div>
+      <div>
+        <div class="task-title">Today Is JSON Prompting Day</div>
+        <div class="task-sub">In an upcoming session, we will learn <strong>video prompting</strong> and <strong>image prompting</strong> — today builds the foundation for both.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRAMEWORK COMPARISON: RTCFR vs SCALE vs JSON -->
+  <div class="compare-card">
+    <div class="compare-title">🧭 Choosing the Right Framework</div>
+    <div class="compare-grid">
+      <div class="compare-item">
+        <div class="compare-name">RTCFR <span class="compare-tag">General Content</span></div>
+        <div class="compare-desc">Best for text-based content — like a salesperson's pitch or marketing copy. Good general-purpose structure.</div>
+      </div>
+      <div class="compare-item advanced">
+        <div class="compare-name">SCALE <span class="compare-tag advanced-tag">Advanced</span></div>
+        <div class="compare-desc">A different, more advanced framework — worth knowing exists. Full details will be covered in depth later.</div>
+      </div>
+    </div>
+    <p class="compare-footer">
+      For <strong>image and video generation specifically, use JSON prompting</strong> — not RTCFR or SCALE.
+      JSON gives you a much higher level of structured detail than plain text ever can, which is exactly what visual generation needs.
+    </p>
+  </div>
+
+  <!-- MARKDOWN PROMPT FORMAT -->
+  <div class="md-card">
+    <div class="md-title">📝 Markdown Prompt Format</div>
+    <p class="md-body">
+      Another format worth knowing: the <strong>Markdown prompt</strong> — used for generating Markdown files,
+      along with a set of extra expressions/syntax specific to this format.
+      With this, the core basics of prompting are now covered.
+    </p>
+  </div>
+
+  <!-- CONTEXT ENGINEERING PREVIEW -->
+  <div class="highlight-box" style="margin-bottom:56px;">
+    <div class="highlight-title">🎯 Coming Up — Context Engineering</div>
+    <p class="highlight-body">
+      The <strong>2nd offline session</strong> will cover <strong>Context Engineering</strong> — the next layer beyond prompting basics.
+      Also: more videos are continuously getting uploaded on <strong>Skool</strong>.
+    </p>
+  </div>
+
+  <!-- HANDS-ON / EXPERIMENT -->
+  <p class="section-label">Hands-On Practice</p>
+  <div style="margin-bottom:56px;">
+    <div class="task-card setup">
+      <div class="task-num">①</div>
+      <div>
+        <div class="task-title">Experiment With Different Prompting Techniques</div>
+        <div class="task-sub">Try generating images using different prompting styles — compare plain text vs JSON-structured prompts to feel the difference in control and detail.</div>
+      </div>
+    </div>
+    <div class="task-card setup">
+      <div class="task-num">②</div>
+      <div>
+        <div class="task-title">This Framework Is What Builds AI Agents</div>
+        <div class="task-sub">The same prompting discipline — including the <strong>system prompt</strong> concept from Day 8 — is exactly what's needed to build reliable AI agents.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OLLAMA HOUSEKEEPING -->
+  <div class="highlight-box" style="margin-bottom:56px;">
+    <div class="highlight-title">🧹 Ollama Housekeeping</div>
+    <p class="highlight-body">
+      To remove a model: <code style="background:white; padding:2px 7px; border-radius:5px; font-family:monospace; font-size:13px; color:var(--cobalt); border:1px solid var(--border);">ollama rm &lt;modelname&gt;</code><br><br>
+      You'll notice a <strong>pycache folder gets created automatically</strong> while running — that's completely normal, not an error.
+    </p>
+  </div>
+
+  <!-- CONCEPTS -->
+  <p class="section-label">Concepts Introduced</p>
+  <div class="pills">
+    <span class="pill p-coral">JSON Prompting</span>
+    <span class="pill p-cobalt">RTCFR</span>
+    <span class="pill p-white">SCALE Framework</span>
+    <span class="pill p-cobalt">Markdown Prompt</span>
+    <span class="pill p-white">Context Engineering</span>
+    <span class="pill p-white">Image Prompting</span>
+    <span class="pill p-white">Video Prompting</span>
+    <span class="pill p-cobalt">ollama rm</span>
+  </div>
+
+  <!-- TOOLS -->
+  <p class="section-label">Tools & Resources</p>
+  <div class="tools-grid">
+    <a href="https://ollama.com" target="_blank" class="tool-item">
+      <div class="tool-icon">🦙</div>
+      <div><div class="tool-name">Ollama</div><div class="tool-desc">ollama.com</div></div>
+    </a>
+    <a href="https://github.com/manojkanur/genai-program" target="_blank" class="tool-item">
+      <div class="tool-icon">🐙</div>
+      <div><div class="tool-name">Manoj's GitHub Repo</div><div class="tool-desc">Assignment reference</div></div>
+    </a>
+    <a href="https://doubt.socialeagle.ai/" target="_blank" class="tool-item">
+      <div class="tool-icon">🦅</div>
+      <div><div class="tool-name">Doubt Portal</div><div class="tool-desc">doubt.socialeagle.ai</div></div>
+    </a>
+  </div>
+
+  <!-- MANTRA -->
+  <div class="mantra">
+    <p class="mantra-label">Cohort Mantra</p>
+    <p class="mantra-text">WE ARE<br>SYSTEM BUILDERS.</p>
+  </div>
+
+  <!-- DOUBT PROTOCOL -->
+  <p class="section-label">Doubt Protocol</p>
+  <div class="community-card">
+    <div class="community-title">💬 Community & Doubt Protocol</div>
+    <p class="community-body">
+      If you have doubts, fill the <strong>doubt clearance form</strong> — it <strong>notifies the team immediately</strong>, and anyone available will respond.<br><br>
+      Speak to your cohort in the <strong>WhatsApp group</strong> first.
+      For escalations, post on: <a href="https://doubt.socialeagle.ai/" target="_blank">doubt.socialeagle.ai</a><br><br>
+      <strong>Any doubts? Ask. Don't hesitate.</strong>
+    </p>
+  </div>
+
+  <!-- FINAL NOTE -->
+  <div class="final-note">
+    <p class="headline">Structure your prompts. <em>Structure your results.</em></p>
+    <p class="sub">The cohort grows together — one commit at a time.</p>
+  </div>
+
+</div>
+
+<footer>
+  <span class="footer-brand">GENAI Architect <span>B9</span></span>
+  <span class="footer-meta">Week 2, Day 9 · 2026</span>
+</footer>
+
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
